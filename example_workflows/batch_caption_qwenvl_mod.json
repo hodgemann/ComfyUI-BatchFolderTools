@@ -1,0 +1,215 @@
+{
+  "last_node_id": 5,
+  "last_link_id": 9,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [-380, 130],
+      "size": [460, 500],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "📋 Batch Caption — Instructions",
+      "properties": {},
+      "widgets_values": [
+        "BATCH IMAGE CAPTIONING  v0.8.0\nhttps://github.com/hodgemann/ComfyUI-BatchFolderTools\n═══════════════════════════════════════════════════════════════════\n\nREQUIRED:  ComfyUI-QwenVL-Mod\nhttps://github.com/huchukato/ComfyUI-QwenVL-Mod\n\nSETUP:\n1. Paste the full path to your image folder into the folder_path field.\n2. folder_path is wired to the Save node, so caption .txt files save right next to your images.  Disconnect the wire and type a different path if you want them elsewhere.\n3. Make sure mode is set to 'sequential' on the Folder Loader.\n\nRUNNING:\n4. Click Queue Prompt once.  That's it.  The Queue Next node automatically re-queues the workflow after each image is processed.  When all images are done, you'll see a ✅ DONE message in the console and the workflow stops on its own.\n5. To stop mid-run, press Escape or click Cancel in ComfyUI.\n\nRESUMING AN INTERRUPTED BATCH:\nIf the run gets interrupted (crash, power loss, you stopped it), set skip_captioned to true on the Folder Loader and click Queue Prompt.  The loader checks for an existing .txt/.caption/.cap file next to each image and skips any that already have one — zero GPU cost for already-done files.  It picks up right where it left off.\n\nNOTES:\n• Images do NOT need sequential names — the loader sorts and accesses by position.\n• keep_model_loaded = true on the QwenVL node is critical — the model loads once and stays in VRAM.\n• temperature 0.3 = factual/consistent.  Raise to 0.6+ for more variety.\n• Images load directly from disk.  Nothing is copied to ComfyUI's cache.\n\nFOLDER_PATH FORMATS:\n• WSL:     /mnt/c/Users/me/images  or  /mnt/d/datasets/photos\n• Linux:   /home/user/images  or  /data/training_set\n• macOS:   /Users/me/images  or  /Volumes/External/photos\n• Windows: C:\\Users\\me\\images  or  D:\\datasets\n• Network shares work if mounted and readable by the OS."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "FolderImageLoader_BFT",
+      "pos": [100, 220],
+      "size": [315, 234],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [5]
+        },
+        {
+          "name": "folder_path",
+          "type": "STRING",
+          "links": [8]
+        },
+        {
+          "name": "filename_stem",
+          "type": "STRING",
+          "links": [7]
+        },
+        {
+          "name": "filename_full",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "current_index",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "total_images",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FolderImageLoader_BFT"
+      },
+      "widgets_values": [
+        "/path/to/your/images",
+        "sequential",
+        0,
+        "alphabetical",
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "AILab_QwenVL_Advanced",
+      "pos": [515, 130],
+      "size": [340, 468],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 5
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "RESPONSE",
+          "type": "STRING",
+          "links": [6]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_QwenVL_Advanced"
+      },
+      "widgets_values": [
+        "Qwen3-VL-8B-Instruct-Abliterated",
+        "auto",
+        false,
+        "auto",
+        "🖼️ Detailed Description",
+        "Describe this image in comprehensive detail for AI image generation model training. Write a single flowing paragraph covering only what is visibly present: the main subject or subjects including their appearance, body pose, facial expression, clothing, and distinguishing features; actions or interactions taking place; the setting and environment; lighting direction, quality, and color temperature; the dominant color palette and tonal range; the medium and style such as photograph, digital painting, 3D render, or illustration; composition and camera angle or viewpoint. If there is legible text or symbols, describe them. Be precise about spatial relationships (left, right, foreground, background). Only describe what you can see. Do not mention the absence of anything.",
+        2048,
+        0.3,
+        0.9,
+        1,
+        1.1,
+        16,
+        true,
+        1,
+        "randomize",
+        false
+      ],
+      "color": "#28403f",
+      "bgcolor": "#374539"
+    },
+    {
+      "id": 4,
+      "type": "SaveTextFile_BFT",
+      "pos": [955, 130],
+      "size": [280, 150],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 6
+        },
+        {
+          "name": "filename_stem",
+          "type": "STRING",
+          "link": 7
+        },
+        {
+          "name": "output_folder",
+          "type": "STRING",
+          "widget": { "name": "output_folder" },
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "saved_text",
+          "type": "STRING",
+          "links": [9]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveTextFile_BFT"
+      },
+      "widgets_values": [
+        "",
+        ".txt",
+        true
+      ]
+    },
+    {
+      "id": 5,
+      "type": "QueueNext_BFT",
+      "pos": [1295, 130],
+      "size": [200, 80],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 9
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "QueueNext_BFT"
+      },
+      "widgets_values": [],
+      "color": "#233",
+      "bgcolor": "#355"
+    }
+  ],
+  "links": [
+    [5,  2, 0, 3, 0, "IMAGE"],
+    [6,  3, 0, 4, 0, "STRING"],
+    [7,  2, 2, 4, 1, "STRING"],
+    [8,  2, 1, 4, 2, "STRING"],
+    [9,  4, 0, 5, 1, "STRING"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0,
+      "offset": [350, -100]
+    }
+  },
+  "version": 0.4
+}

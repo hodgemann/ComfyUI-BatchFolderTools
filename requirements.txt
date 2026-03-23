@@ -1,0 +1,6 @@
+# All dependencies ship with a standard ComfyUI installation.
+# opencv-python is needed for the video loader node.
+Pillow
+numpy
+torch
+opencv-python

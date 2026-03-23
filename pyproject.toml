@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-batch-folder-tools"
+description = "Batch folder processing nodes for ComfyUI — iterate a folder of images or videos through any workflow. Load sequentially, extract video frames, save text outputs, auto-loop with one click."
+version = "0.8.0"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = ["Pillow", "numpy", "torch", "opencv-python"]
+
+[project.urls]
+Repository = "https://github.com/hodgemann/ComfyUI-BatchFolderTools"
+
+[tool.comfy]
+PublisherId = "hodgemann"
+DisplayName = "Batch Folder Tools"
+Icon = ""

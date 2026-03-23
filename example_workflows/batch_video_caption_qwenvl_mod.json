@@ -1,0 +1,224 @@
+{
+  "last_node_id": 5,
+  "last_link_id": 9,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [-380, 130],
+      "size": [460, 560],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "📋 Batch Video Caption — Instructions",
+      "properties": {},
+      "widgets_values": [
+        "BATCH VIDEO CAPTIONING  v0.8.0\nhttps://github.com/hodgemann/ComfyUI-BatchFolderTools\n═══════════════════════════════════════════════════════════════════\n\nREQUIRED:  ComfyUI-QwenVL-Mod\nhttps://github.com/huchukato/ComfyUI-QwenVL-Mod\n\nREQUIRED:  opencv-python\npip install opencv-python  (if not already installed)\n\nSETUP:\n1. Paste the full path to your video folder into the folder_path field.\n2. folder_path is wired to the Save node, so caption .txt files save right next to your videos.  Disconnect the wire and type a different path if you want them elsewhere.\n3. Set mode to 'sequential' on the Video Loader.\n4. Choose your frame_mode.  'evenly_spaced' with frame_count=16 is a good default — the VLM sees 16 frames spread across the full duration.  Use 'first_frame' for a thumbnail description.\n\nRUNNING:\n5. Click Queue Prompt once.  The Queue Next node handles the rest.  Console shows ✅ DONE when complete.\n6. To stop mid-run, press Escape or click Cancel.\n\nRESUMING AN INTERRUPTED BATCH:\nIf the run gets interrupted (crash, power loss, you stopped it), set skip_captioned to true on the Video Loader and click Queue Prompt.  The loader checks for an existing .txt/.caption/.cap file next to each video and skips any that already have one — zero GPU cost for already-done files.  It picks up right where it left off.\n\nFRAME MODES:\n• first_frame — one frame from the start\n• last_frame — one frame from the end\n• all_frames — every frame (watch VRAM!)\n• evenly_spaced — N frames sampled evenly (default 16)\n• frame_range — contiguous range by index\n\nFOLDER_PATH FORMATS:\n• WSL:     /mnt/c/Users/me/videos  or  /mnt/d/datasets\n• Linux:   /home/user/videos  or  /data/training_set\n• macOS:   /Users/me/videos  or  /Volumes/External\n• Windows: C:\\Users\\me\\videos  or  D:\\datasets\n• Network shares work if mounted and readable by the OS.\n\nVIDEO FORMATS: MP4, AVI, MOV, MKV, WebM, FLV, WMV, M4V\n\nOUTPUTS:\nThe Video Loader outputs fps and duration_seconds alongside frames.  You may see a console warning about 'fps frames per second but no video_metadata was provided' — this is harmless and comes from QwenVL's internal processing."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "FolderVideoLoader_BFT",
+      "pos": [100, 180],
+      "size": [330, 330],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FRAMES",
+          "type": "IMAGE",
+          "links": [5]
+        },
+        {
+          "name": "folder_path",
+          "type": "STRING",
+          "links": [8]
+        },
+        {
+          "name": "filename_stem",
+          "type": "STRING",
+          "links": [7]
+        },
+        {
+          "name": "filename_full",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "current_index",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "total_videos",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "frame_count",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FolderVideoLoader_BFT"
+      },
+      "widgets_values": [
+        "/path/to/your/videos",
+        "evenly_spaced",
+        16,
+        0,
+        -1,
+        "sequential",
+        0,
+        "alphabetical",
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "AILab_QwenVL_Advanced",
+      "pos": [530, 130],
+      "size": [340, 468],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "RESPONSE",
+          "type": "STRING",
+          "links": [6]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_QwenVL_Advanced"
+      },
+      "widgets_values": [
+        "Qwen3-VL-8B-Instruct-Abliterated",
+        "auto",
+        false,
+        "auto",
+        "🖼️ Detailed Description",
+        "Describe this video in comprehensive detail for AI video generation model training. Write a single flowing paragraph covering only what is visibly present: the main subject or subjects including their appearance, clothing, and distinguishing features; all actions, movements, and gestures that occur throughout the video described in chronological order; the setting and environment; camera work such as static shots, panning, tracking, zooming, handheld movement, or shot transitions; lighting direction, quality, color temperature, and any changes across the video; the dominant color palette and tonal range; the medium and style such as live-action footage, animation, screen recording, slow motion, time-lapse, or color grading. If there is visible text, titles, or on-screen graphics, describe them. Be precise about the temporal flow — what happens first, next, and last. Only describe what you can see. Do not mention the absence of anything.",
+        2048,
+        0.3,
+        0.9,
+        1,
+        1.1,
+        16,
+        true,
+        1,
+        "randomize",
+        false
+      ],
+      "color": "#28403f",
+      "bgcolor": "#374539"
+    },
+    {
+      "id": 4,
+      "type": "SaveTextFile_BFT",
+      "pos": [970, 130],
+      "size": [280, 150],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 6
+        },
+        {
+          "name": "filename_stem",
+          "type": "STRING",
+          "link": 7
+        },
+        {
+          "name": "output_folder",
+          "type": "STRING",
+          "widget": { "name": "output_folder" },
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "saved_text",
+          "type": "STRING",
+          "links": [9]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveTextFile_BFT"
+      },
+      "widgets_values": [
+        "",
+        ".txt",
+        true
+      ]
+    },
+    {
+      "id": 5,
+      "type": "QueueNext_BFT",
+      "pos": [1310, 130],
+      "size": [200, 80],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 9
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "QueueNext_BFT"
+      },
+      "widgets_values": [],
+      "color": "#233",
+      "bgcolor": "#355"
+    }
+  ],
+  "links": [
+    [5,  2, 0, 3, 1, "IMAGE"],
+    [6,  3, 0, 4, 0, "STRING"],
+    [7,  2, 2, 4, 1, "STRING"],
+    [8,  2, 1, 4, 2, "STRING"],
+    [9,  4, 0, 5, 1, "STRING"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0,
+      "offset": [350, -100]
+    }
+  },
+  "version": 0.4
+}
