@@ -14,8 +14,29 @@ jobs:
     if: ${{ github.repository_owner == 'hodgemann' }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # A push that edits pyproject.toml without changing the version would try
+      # to republish an existing version, which the registry rejects.
+      # Manual runs (workflow_dispatch) always publish.
+      - name: Check whether the version changed
+        id: version
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          new=$(grep -m1 '^version' pyproject.toml)
+          old=$(git show "$BEFORE:pyproject.toml" 2>/dev/null | grep -m1 '^version' || true)
+          if [ "$EVENT" = workflow_dispatch ] || [ "$new" != "$old" ]; then
+            echo "Publishing: $new (was: ${old:-none})"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version unchanged ($new); skipping publish."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Publish Custom Node
+        if: steps.version.outputs.publish == 'true'
         uses: Comfy-Org/publish-node-action@main
         with:
           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
